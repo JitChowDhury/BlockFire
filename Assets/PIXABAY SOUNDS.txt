@@ -1,0 +1,19 @@
+PIXABAY SOUNDS
+dramatic-game-music-loop-by-kris-klavenes-31430
+violindanger-83476(alert pacman)
+horror-chase-music-loop-67634(pacman chase)
+looping-horror-groaning-64518(monster-pacman)
+horror-ambience-1-303647(Bgm)
+paper-rustle-81855(map)
+horror-258261 (main menu)
+
+FREESOUND
+195954__minian89__death_blood_splatter
+562018__mattruthsound__paper-ball-crumpled-throwing-to-ground-impact-hit-drop-sharp-impact_96khz_mono_zoomh4n_nt5-003
+629020__kolombooo__button-click(button click)
+
+
+
+
+UI PACK
+https://toffeecraft.itch.io/ui-user-interface-pack-horror
