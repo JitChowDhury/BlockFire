@@ -6,7 +6,7 @@ public class Gun : MonoBehaviour
     private float damage;
     private float range;
     public Camera fpsCam;
-    public WEAPONSO weaponSO;
+    public WEAPONSO weaponSO;//reference to the weaponSO
 
 
     private float nextTimeToFire = 0f;
@@ -16,6 +16,7 @@ public class Gun : MonoBehaviour
     {
         damage = weaponSO.Damage;
         range = weaponSO.Range;
+        nextTimeToFire = Time.time;
     }
 
     void Update()

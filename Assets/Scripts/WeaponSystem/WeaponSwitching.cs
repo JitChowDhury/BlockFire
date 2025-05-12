@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WeaponSwitching : MonoBehaviour
 {
-    public int selectedWeapon = 0;
+    public int selectedWeapon = 1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

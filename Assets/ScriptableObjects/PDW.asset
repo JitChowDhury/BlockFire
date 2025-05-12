@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 510edc1fefef242408dcb7fdeab01a98, type: 3}
   m_Name: PDW
   m_EditorClassIdentifier: 
-  Damage: 0
-  Range: 0
-  FireRate: 5
+  Damage: 15
+  Range: 35
+  FireRate: 10
   isAutomatic: 1
