@@ -7,15 +7,26 @@ public class Movement : MonoBehaviour
     private bool isGrounded;
 
     private Vector3 movementDirection;
+    private Vector2 lookInput;
     private float verticalVelocity;
     public float speed = 5f;
     public float jumpForce = 1.5f;
     public float gravity = -9.8f;
 
+    public float lookSensitivity = 100f; // Mouse sensitivity for look rotation
+    private float pitch = 0f;
+
+    public Transform cameraTransform;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playerCharController = GetComponent<CharacterController>();
+        if (cameraTransform != null)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     // Update is called once per frame
@@ -24,9 +35,21 @@ public class Movement : MonoBehaviour
         isGrounded = playerCharController.isGrounded;
 
         MovePlayer();
+        Applylook();
 
     }
+    void Applylook()
+    {
+        float yaw = lookInput.x * lookSensitivity * Time.deltaTime;
+        transform.Rotate(0, yaw, 0);
 
+        if (cameraTransform != null)
+        {
+            pitch -= lookInput.y * lookSensitivity * Time.deltaTime; // Subtract for natural mouse direction
+            pitch = Mathf.Clamp(pitch, -80f, 80f); // Clamp to avoid flipping
+            cameraTransform.localRotation = Quaternion.Euler(pitch, 0, 0);
+        }
+    }
 
     void MovePlayer()
     {
@@ -58,4 +81,10 @@ public class Movement : MonoBehaviour
         verticalVelocity = jumpForce;
 
     }
+
+    public void HandleLook(InputAction.CallbackContext context)
+    {
+        lookInput = context.ReadValue<Vector2>();
+    }
+
 }
