@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class Gun : MonoBehaviour
 {
-    public float damage = 10f;
-    public float range = 100f;
+    private float damage;
+    private float range;
     public Camera fpsCam;
     public WEAPONSO weaponSO;
 
@@ -12,6 +12,12 @@ public class Gun : MonoBehaviour
     private float nextTimeToFire = 0f;
     private bool isShooting = false;
     // Update is called once per frame
+    void Start()
+    {
+        damage = weaponSO.Damage;
+        range = weaponSO.Range;
+    }
+
     void Update()
     {
         if (isShooting && Time.time >= nextTimeToFire)
