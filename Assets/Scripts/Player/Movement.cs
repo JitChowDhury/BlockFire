@@ -105,7 +105,7 @@ namespace FPS.Player
             // Effect: Moves character in world space, handling collisions
             playerCharController.Move(worldMovementDirection * speed * Time.deltaTime);
             // Debug log to monitor movement direction for testing
-            Debug.Log(movementDirection);
+
         }
 
         // Handles movement input from WASD or gamepad left stick
