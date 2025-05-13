@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 20
   Range: 10
-  FireRate: 5
+  FireRate: 2
   isAutomatic: 0

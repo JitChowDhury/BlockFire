@@ -1,68 +1,87 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Gun : MonoBehaviour
+namespace FPS.Weapon
 {
-    private float damage;
-    private float range;
-    public Camera fpsCam;
-    public WEAPONSO weaponSO;//reference to the weaponSO
-
-
-    private float nextTimeToFire = 0f;
-    private bool isShooting = false;
-    // Update is called once per frame
-    void Start()
+    public class Gun : MonoBehaviour
     {
-        damage = weaponSO.Damage;
-        range = weaponSO.Range;
-        nextTimeToFire = Time.time;
-    }
+        private float damage;
+        private float range;
+        public Camera fpsCam;
+        public WEAPONSO weaponSO; // Reference to the weaponSO
 
-    void Update()
-    {
-        if (isShooting && Time.time >= nextTimeToFire)
+        private float nextTimeToFire = 0f;
+        private bool isShooting = false;
+
+        void Start()
         {
-            nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
-            Shoot();
-        }
-    }
-
-    public void HandleShoot(InputAction.CallbackContext context)
-    {
-        // When button is pressed
-        if (context.started)
-        {
-            if (!weaponSO.isAutomatic)
+            damage = weaponSO.Damage;
+            range = weaponSO.Range;
+            if (weaponSO.FireRate <= 0)
             {
-                // Only shoot if cooldown has passed
-                if (Time.time >= nextTimeToFire)
+                weaponSO.FireRate = 1f;
+            }
+            nextTimeToFire = Time.time;
+        }
+
+        void OnEnable()
+        {
+            isShooting = false; // Reset shooting state when weapon is activated
+        }
+
+        void OnDisable()
+        {
+            isShooting = false; // Ensure shooting stops when weapon is deactivated
+        }
+
+        void Update()
+        {
+            if (isShooting && Time.time >= nextTimeToFire)
+            {
+                nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
+                Shoot();
+            }
+        }
+
+        public void HandleShoot(InputAction.CallbackContext context)
+        {
+            // Ignore input if the weapon is not active
+            if (!gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            if (context.started)
+            {
+                if (!weaponSO.isAutomatic)
                 {
-                    nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
-                    Shoot();
+                    if (Time.time >= nextTimeToFire)
+                    {
+                        nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
+                        Shoot();
+                    }
+                }
+                else
+                {
+                    isShooting = true;
                 }
             }
-            else
+            else if (context.canceled)
             {
-                isShooting = true;
+                isShooting = false;
             }
         }
 
-        // When button is released
-        else if (context.canceled)
+        void Shoot()
         {
-            isShooting = false;
+            RaycastHit hit;
+            if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
+            {
+                if (hit.collider.CompareTag("Enemy"))
+                {
+                    Destroy(hit.collider.gameObject);
+                }
+            }
         }
-    }
-
-
-    void Shoot()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
-        {
-            Destroy(hit.collider.gameObject);
-        }
-
     }
 }
