@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FPS.Utility;
 
 namespace FPS.Weapon
 {
@@ -77,15 +78,15 @@ namespace FPS.Weapon
 
         void Shoot()
         {
-            
-            animator.Play("Shoot", 0, 0f);
+
+            animator.Play(Constants.SHOOT_ANIM, 0, 0f);
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
-                
-                
+                if (hit.collider.CompareTag(Constants.ENEMY_TAG ))
+
                     Destroy(hit.collider.gameObject);
-                
+
             }
         }
     }
