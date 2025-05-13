@@ -7,6 +7,7 @@ namespace FPS.Weapon
     {
         private float damage;
         private float range;
+        private Animator animator;
         public Camera fpsCam;
         public WEAPONSO weaponSO; // Reference to the weaponSO
 
@@ -15,6 +16,8 @@ namespace FPS.Weapon
 
         void Start()
         {
+            animator = GetComponent<Animator>();
+
             damage = weaponSO.Damage;
             range = weaponSO.Range;
             if (weaponSO.FireRate <= 0)
@@ -74,13 +77,15 @@ namespace FPS.Weapon
 
         void Shoot()
         {
+            
+            animator.Play("Shoot", 0, 0f);
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
-                if (hit.collider.CompareTag("Enemy"))
-                {
+                
+                
                     Destroy(hit.collider.gameObject);
-                }
+                
             }
         }
     }
