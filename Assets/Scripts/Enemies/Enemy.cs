@@ -1,3 +1,4 @@
+using FPS.Core;
 using FPS.Utility;
 using Unity.Mathematics;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class Enemy : MonoBehaviour
     private float attackRange = 2f;
     private PlayerInput playerInput;
 
+    [SerializeField] private float health = 40f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -20,9 +23,19 @@ public class Enemy : MonoBehaviour
         playerInput = GameObject.Find("GameManager").GetComponent<PlayerInput>();
 
     }
+
+    void OnEnable()
+    {
+        EventManager.OnEnemyDamage += HandleDamage;
+    }
+    void OnDisable()
+    {
+        EventManager.OnEnemyDamage -= HandleDamage;
+    }
+
     void Update()
     {
-
+        if (health <= 0) Destroy(gameObject);
     }
     // Update is called once per frame
     void FixedUpdate()
@@ -44,6 +57,11 @@ public class Enemy : MonoBehaviour
         Vector3 playerPosition = Player.transform.position;
         //same as (enemyPosition-playerPosition).magnitude
         distanceToPlayer = Vector3.Distance(enemyPosition, playerPosition);
+    }
+
+    void HandleDamage(float damage)
+    {
+        health -= damage;
     }
 
 }

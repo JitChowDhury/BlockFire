@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using FPS.Utility;
 using Unity.Mathematics;
 using System.Collections;
+using FPS.Core;
 
 namespace FPS.Weapon
 {
@@ -120,7 +121,7 @@ namespace FPS.Weapon
                 currentAmmo--;
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
 
-                    Destroy(hit.collider.gameObject);
+                    EventManager.RaiseOnEnemyDamage(weaponSO.Damage);
 
             }
         }
