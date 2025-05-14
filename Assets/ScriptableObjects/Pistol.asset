@@ -15,4 +15,6 @@ MonoBehaviour:
   Damage: 20
   Range: 10
   FireRate: 2
+  maxAmmo: 12
+  reloadTime: 1.2
   isAutomatic: 0

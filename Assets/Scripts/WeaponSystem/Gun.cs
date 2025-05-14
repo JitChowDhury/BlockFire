@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using FPS.Utility;
 using Unity.Mathematics;
+using System.Collections;
 
 namespace FPS.Weapon
 {
@@ -10,15 +11,20 @@ namespace FPS.Weapon
         private float damage;
         private float range;
         private Animator animator;
+        private int currentAmmo;
+        private bool isReloading = false;
+
         public Camera fpsCam;
         public WEAPONSO weaponSO; // Reference to the weaponSO
         [SerializeField] private GameObject bulletImpact;
+        [SerializeField] private AnimationClip reload;
 
         private float nextTimeToFire = 0f;
         private bool isShooting = false;
 
         void Start()
         {
+            currentAmmo = weaponSO.maxAmmo;
             animator = GetComponent<Animator>();
 
             damage = weaponSO.Damage;
@@ -33,6 +39,7 @@ namespace FPS.Weapon
         void OnEnable()
         {
             isShooting = false; // Reset shooting state when weapon is activated
+
         }
 
         void OnDisable()
@@ -42,11 +49,32 @@ namespace FPS.Weapon
 
         void Update()
         {
+            if (isReloading) return;
+            if (currentAmmo <= 0)
+            {
+                StartCoroutine(Reload());
+                return;
+            }
+
+
             if (isShooting && Time.time >= nextTimeToFire)
             {
                 nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
                 Shoot();
             }
+        }
+
+        IEnumerator Reload()
+        {
+            isReloading = true;
+            animator.Play(Constants.RELOAD_ANIM, 0, 0f);
+
+            yield return new WaitForSeconds(reload.length);
+            currentAmmo = weaponSO.maxAmmo;
+            isReloading = false;
+
+
+
         }
 
         public void HandleShoot(InputAction.CallbackContext context)
@@ -80,12 +108,16 @@ namespace FPS.Weapon
 
         void Shoot()
         {
+            if (isReloading) return;
+            if (currentAmmo <= 0) return;
 
             animator.Play(Constants.SHOOT_ANIM, 0, 0f);
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
+                if (hit.collider.CompareTag(Constants.PLAYER_TAG)) return;
                 Instantiate(bulletImpact, hit.point, quaternion.identity);
+                currentAmmo--;
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
 
                     Destroy(hit.collider.gameObject);
