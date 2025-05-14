@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using FPS.Utility;
+using Unity.Mathematics;
 
 namespace FPS.Weapon
 {
@@ -11,6 +12,7 @@ namespace FPS.Weapon
         private Animator animator;
         public Camera fpsCam;
         public WEAPONSO weaponSO; // Reference to the weaponSO
+        [SerializeField] private GameObject bulletImpact;
 
         private float nextTimeToFire = 0f;
         private bool isShooting = false;
@@ -83,7 +85,8 @@ namespace FPS.Weapon
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
-                if (hit.collider.CompareTag(Constants.ENEMY_TAG ))
+                Instantiate(bulletImpact, hit.point, quaternion.identity);
+                if (hit.collider.CompareTag(Constants.ENEMY_TAG))
 
                     Destroy(hit.collider.gameObject);
 
