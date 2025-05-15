@@ -7,11 +7,15 @@ using UnityEngine.InputSystem;
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] GameObject explosionPrefab;
+
     private NavMeshAgent agent;
     private Transform Player;
     private float distanceToPlayer;
     private float attackRange = 2f;
     private PlayerInput playerInput;
+    private bool hasExploded = false;
+    
 
     [SerializeField] private float health = 40f;
 
@@ -40,12 +44,17 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (hasExploded) return;
+
         agent.SetDestination(Player.position);
         CalculateDistanceToPlayer();
 
         if (distanceToPlayer <= attackRange)
         {
-            GameObject.Find("GameManager").GetComponent<PlayerInput>().enabled = false;
+            hasExploded = true;
+            Instantiate(explosionPrefab, transform.position, quaternion.identity);
+            Destroy(gameObject);
+           // playerInput.enabled = false;
         }
     }
 
