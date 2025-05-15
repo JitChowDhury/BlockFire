@@ -4,6 +4,7 @@ using FPS.Utility;
 using Unity.Mathematics;
 using System.Collections;
 using FPS.Core;
+using UnityEngine.UI;
 
 namespace FPS.Weapon
 {
@@ -19,7 +20,7 @@ namespace FPS.Weapon
         public WEAPONSO weaponSO; // Reference to the weaponSO
         [SerializeField] private GameObject bulletImpact;
         [SerializeField] private AnimationClip reload;
-        
+        [SerializeField] private Image crossHair;
 
         private float nextTimeToFire = 0f;
         private bool isShooting = false;
@@ -51,6 +52,7 @@ namespace FPS.Weapon
 
         void Update()
         {
+            HandleCrossHair();
             if (isReloading) return;
             if (currentAmmo <= 0)
             {
@@ -108,6 +110,24 @@ namespace FPS.Weapon
             }
         }
 
+
+        void HandleCrossHair()
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
+            {
+                if (hit.collider.CompareTag(Constants.ENEMY_TAG))
+                {
+
+                    crossHair.color = Color.red;
+                }
+                else
+                {
+                    crossHair.color = Color.white;
+                }
+            }
+        }
+
         void Shoot()
         {
             if (isReloading) return;
@@ -121,9 +141,8 @@ namespace FPS.Weapon
                 Instantiate(bulletImpact, hit.point, quaternion.identity);
                 currentAmmo--;
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
-
-
                     EventManager.RaiseOnEnemyDamage(hit.collider.GetComponent<Enemy>(), weaponSO.Damage);
+
 
             }
         }
