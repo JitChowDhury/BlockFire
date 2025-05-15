@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
             hasExploded = true;
             Instantiate(explosionPrefab, transform.position, quaternion.identity);
             Destroy(gameObject);
-            // playerInput.enabled = false;
+            //playerInput.enabled = false;
         }
     }
 

@@ -8,6 +8,7 @@ namespace FPS.Weapon
         public float Range;
         public float FireRate;
         public int maxAmmo;
+        public int maxMag;
         public float reloadTime;
         public bool isAutomatic;
     }

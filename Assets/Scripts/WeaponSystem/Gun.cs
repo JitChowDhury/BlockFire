@@ -14,6 +14,8 @@ namespace FPS.Weapon
         private float range;
         private Animator animator;
         private int currentAmmo;
+        private int magCap;
+        private int currentMag;
         private bool isReloading = false;
 
         public Camera fpsCam;
@@ -27,6 +29,8 @@ namespace FPS.Weapon
 
         void Start()
         {
+            magCap = weaponSO.maxMag;
+            currentMag = magCap;
             currentAmmo = weaponSO.maxAmmo;
             animator = GetComponent<Animator>();
 
@@ -52,14 +56,18 @@ namespace FPS.Weapon
 
         void Update()
         {
-            HandleCrossHair();
             if (isReloading) return;
-            if (currentAmmo <= 0)
+            if (currentMag == 0) return;
+
+            HandleCrossHair();
+
+            if (currentAmmo <= 0 && currentMag > 0) // Only try to reload if we have magazines
             {
                 StartCoroutine(Reload());
                 return;
             }
 
+            // No point in continuing if we're completely out of ammo
 
             if (isShooting && Time.time >= nextTimeToFire)
             {
@@ -70,11 +78,21 @@ namespace FPS.Weapon
 
         IEnumerator Reload()
         {
+            if (currentMag <= 0)
+            {
+                // Maybe play a "click" sound here to indicate no ammo
+                yield break;
+            }
             isReloading = true;
-            animator.Play(Constants.RELOAD_ANIM, 0, 0f);
+            if (currentMag > 0)
+            {
+                animator.Play(Constants.RELOAD_ANIM, 0, 0f);
 
-            yield return new WaitForSeconds(reload.length);
-            currentAmmo = weaponSO.maxAmmo;
+                yield return new WaitForSeconds(reload.length);
+                currentAmmo = weaponSO.maxAmmo;
+                currentMag--;
+                Debug.Log("Mag cap is now " + currentMag);
+            }
             isReloading = false;
 
 

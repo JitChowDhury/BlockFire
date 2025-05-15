@@ -16,5 +16,6 @@ MonoBehaviour:
   Range: 10
   FireRate: 2
   maxAmmo: 12
+  maxMag: 3
   reloadTime: 1.2
   isAutomatic: 0
