@@ -4,9 +4,9 @@ namespace FPS.Core
 {
     public static class EventManager
     {
-        public static event UnityAction<float> OnEnemyDamage;
+        public static event UnityAction<Enemy, float> OnEnemyDamage;
 
 
-        public static void RaiseOnEnemyDamage(float damage) => OnEnemyDamage?.Invoke(damage);
+        public static void RaiseOnEnemyDamage(Enemy enemy, float damage) => OnEnemyDamage?.Invoke(enemy, damage);
     }
 }

@@ -15,7 +15,7 @@ public class Enemy : MonoBehaviour
     private float attackRange = 2f;
     private PlayerInput playerInput;
     private bool hasExploded = false;
-    
+
 
     [SerializeField] private float health = 40f;
 
@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
             hasExploded = true;
             Instantiate(explosionPrefab, transform.position, quaternion.identity);
             Destroy(gameObject);
-           // playerInput.enabled = false;
+            // playerInput.enabled = false;
         }
     }
 
@@ -68,8 +68,9 @@ public class Enemy : MonoBehaviour
         distanceToPlayer = Vector3.Distance(enemyPosition, playerPosition);
     }
 
-    void HandleDamage(float damage)
+    void HandleDamage(Enemy target, float damage)
     {
+        if (target != this) return;
         health -= damage;
     }
 

@@ -19,6 +19,7 @@ namespace FPS.Weapon
         public WEAPONSO weaponSO; // Reference to the weaponSO
         [SerializeField] private GameObject bulletImpact;
         [SerializeField] private AnimationClip reload;
+        
 
         private float nextTimeToFire = 0f;
         private bool isShooting = false;
@@ -121,7 +122,8 @@ namespace FPS.Weapon
                 currentAmmo--;
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
 
-                    EventManager.RaiseOnEnemyDamage(weaponSO.Damage);
+
+                    EventManager.RaiseOnEnemyDamage(hit.collider.GetComponent<Enemy>(), weaponSO.Damage);
 
             }
         }
