@@ -23,6 +23,7 @@ namespace FPS.Weapon
         [SerializeField] private GameObject bulletImpact;
         [SerializeField] private AnimationClip reload;
         [SerializeField] private Image crossHair;
+        [SerializeField] private AudioSource emptymag;
 
         private float nextTimeToFire = 0f;
         private bool isShooting = false;
@@ -46,7 +47,6 @@ namespace FPS.Weapon
         void OnEnable()
         {
             isShooting = false; // Reset shooting state when weapon is activated
-
         }
 
         void OnDisable()
@@ -57,17 +57,21 @@ namespace FPS.Weapon
         void Update()
         {
             if (isReloading) return;
-            if (currentMag == 0) return;
+
+            // Stop all actions if magazine is completely empty
+            if (currentMag == 0)
+            {
+                return;
+            }
 
             HandleCrossHair();
 
-            if (currentAmmo <= 0 && currentMag > 0) // Only try to reload if we have magazines
+            // Only attempt to reload if we have magazines and ammo is depleted
+            if (currentAmmo <= 0 && currentMag > 0)
             {
                 StartCoroutine(Reload());
                 return;
             }
-
-            // No point in continuing if we're completely out of ammo
 
             if (isShooting && Time.time >= nextTimeToFire)
             {
@@ -80,23 +84,16 @@ namespace FPS.Weapon
         {
             if (currentMag <= 0)
             {
-                // Maybe play a "click" sound here to indicate no ammo
                 yield break;
             }
             isReloading = true;
-            if (currentMag > 0)
-            {
-                animator.Play(Constants.RELOAD_ANIM, 0, 0f);
+            animator.Play(Constants.RELOAD_ANIM, 0, 0f);
 
-                yield return new WaitForSeconds(reload.length);
-                currentAmmo = weaponSO.maxAmmo;
-                currentMag--;
-                Debug.Log("Mag cap is now " + currentMag);
-            }
+            yield return new WaitForSeconds(reload.length);
+            currentAmmo = weaponSO.maxAmmo;
+            currentMag--;
+            Debug.Log("Mag cap is now " + currentMag);
             isReloading = false;
-
-
-
         }
 
         public void HandleShoot(InputAction.CallbackContext context)
@@ -109,6 +106,16 @@ namespace FPS.Weapon
 
             if (context.started)
             {
+                // If magazine is empty, play click sound and do nothing else
+                if (currentMag == 0)
+                {
+                    if (emptymag != null)
+                    {
+                        emptymag.Play();
+                    }
+                    return;
+                }
+
                 if (!weaponSO.isAutomatic)
                 {
                     if (Time.time >= nextTimeToFire)
@@ -128,7 +135,6 @@ namespace FPS.Weapon
             }
         }
 
-
         void HandleCrossHair()
         {
             RaycastHit hit;
@@ -136,7 +142,6 @@ namespace FPS.Weapon
             {
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
                 {
-
                     crossHair.color = Color.red;
                 }
                 else
@@ -160,8 +165,6 @@ namespace FPS.Weapon
                 currentAmmo--;
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
                     EventManager.RaiseOnEnemyDamage(hit.collider.GetComponent<Enemy>(), weaponSO.Damage);
-
-
             }
         }
     }
