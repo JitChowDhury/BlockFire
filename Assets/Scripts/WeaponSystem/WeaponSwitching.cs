@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace FPS.Weapon
 {
     public class WeaponSwitching : MonoBehaviour
@@ -14,22 +15,31 @@ namespace FPS.Weapon
         // Update is called once per frame
         void Update()
         {
-
             int previousSelectedWeapon = selectedWeapon;
-            if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+
+            // Get the current weapon's Gun component to check if it's reloading
+            Transform currentWeapon = transform.GetChild(selectedWeapon);
+            Gun currentGun = currentWeapon.GetComponent<Gun>();
+
+            // Only allow switching if the current gun is not reloading
+            if (currentGun != null && !currentGun.isReloading)
             {
-                if (selectedWeapon >= transform.childCount - 1)
-                    selectedWeapon = 0;
-                else
-                    selectedWeapon++;
+                if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+                {
+                    if (selectedWeapon >= transform.childCount - 1)
+                        selectedWeapon = 0;
+                    else
+                        selectedWeapon++;
+                }
+                if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+                {
+                    if (selectedWeapon <= 0)
+                        selectedWeapon = transform.childCount - 1;
+                    else
+                        selectedWeapon--;
+                }
             }
-            if (Input.GetAxis("Mouse ScrollWheel") < 0f)
-            {
-                if (selectedWeapon <= 0)
-                    selectedWeapon = transform.childCount - 1;
-                else
-                    selectedWeapon--;
-            }
+
             if (previousSelectedWeapon != selectedWeapon)
             {
                 SelectWeapon();

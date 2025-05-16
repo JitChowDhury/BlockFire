@@ -10,163 +10,195 @@ namespace FPS.Weapon
 {
     public class Gun : MonoBehaviour
     {
+        // Weapon properties
         private float damage;
         private float range;
-        private Animator animator;
+        private float fireRate;
+        private bool isAutomatic;
+
+        // Ammo and magazine
         private int currentAmmo;
-        private int magCap;
+        private int maxAmmo;
         private int currentMag;
-        private bool isReloading = false;
+        private int maxMag;
 
+        // State
+        public bool isReloading { get; private set; } = false;
+        private bool isFiring = false;
+        private float nextFireTime = 0f;
+
+        // Components and references
+        private Animator animator;
         public Camera fpsCam;
-        public WEAPONSO weaponSO; // Reference to the weaponSO
-        [SerializeField] private GameObject bulletImpact;
-        [SerializeField] private AnimationClip reload;
-        [SerializeField] private Image crossHair;
-        [SerializeField] private AudioSource emptymag;
-
-        private float nextTimeToFire = 0f;
-        private bool isShooting = false;
+        public WEAPONSO weaponSO;
+        [SerializeField] private GameObject bulletImpactPrefab;
+        [SerializeField] private AnimationClip reloadClip;
+        [SerializeField] private Image crosshairImage;
+        [SerializeField] private AudioSource emptyMagSound;
 
         void Start()
         {
-            magCap = weaponSO.maxMag;
-            currentMag = magCap;
-            currentAmmo = weaponSO.maxAmmo;
-            animator = GetComponent<Animator>();
-
+            // Initialize weapon properties from ScriptableObject
             damage = weaponSO.Damage;
             range = weaponSO.Range;
-            if (weaponSO.FireRate <= 0)
-            {
-                weaponSO.FireRate = 1f;
-            }
-            nextTimeToFire = Time.time;
+            fireRate = weaponSO.FireRate > 0 ? weaponSO.FireRate : 1f;
+            isAutomatic = weaponSO.isAutomatic;
+            maxAmmo = weaponSO.maxAmmo;
+            maxMag = weaponSO.maxMag;
+
+            // Initialize ammo and magazines
+            currentAmmo = maxAmmo;
+            currentMag = maxMag;
+
+            // Get components
+            animator = GetComponent<Animator>();
         }
 
         void OnEnable()
         {
-            isShooting = false; // Reset shooting state when weapon is activated
+            isFiring = false;
+            isReloading = false;
         }
 
         void OnDisable()
         {
-            isShooting = false; // Ensure shooting stops when weapon is deactivated
+            isFiring = false;
+            isReloading = false;
+            StopAllCoroutines(); // Ensure reload coroutine stops
         }
 
         void Update()
         {
-            if (isReloading) return;
-
-            // Stop all actions if magazine is completely empty
-            if (currentMag == 0)
-            {
+            if (isReloading)
                 return;
-            }
 
-            HandleCrossHair();
+            // Handle crosshair color
+            UpdateCrosshair();
 
-            // Only attempt to reload if we have magazines and ammo is depleted
-            if (currentAmmo <= 0 && currentMag > 0)
+            // Check for reload condition
+            if (currentAmmo <= 0 && currentMag > 0 && !isReloading)
             {
                 StartCoroutine(Reload());
                 return;
             }
 
-            if (isShooting && Time.time >= nextTimeToFire)
+            // Handle continuous firing for automatic weapons
+            if (isFiring && isAutomatic && Time.time >= nextFireTime && currentAmmo > 0)
             {
-                nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
+                nextFireTime = Time.time + 1f / fireRate;
                 Shoot();
             }
         }
 
         IEnumerator Reload()
         {
-            if (currentMag <= 0)
+            // Validate reload conditions
+            if (currentMag <= 0 || isReloading || currentAmmo >= maxAmmo)
             {
                 yield break;
             }
-            isReloading = true;
-            animator.Play(Constants.RELOAD_ANIM, 0, 0f);
 
-            yield return new WaitForSeconds(reload.length);
-            currentAmmo = weaponSO.maxAmmo;
-            currentMag--;
-            Debug.Log("Mag cap is now " + currentMag);
+            // Start reload
+            isReloading = true;
+            animator.SetTrigger(Constants.RELOAD_ANIM);
+
+            // Wait for animation duration
+            yield return new WaitForSeconds(reloadClip.length);
+
+            // Update ammo and mag
+            if (currentMag > 0)
+            {
+                currentAmmo = maxAmmo;
+                currentMag--;
+                Debug.Log($"Reloaded. Ammo: {currentAmmo}/{maxAmmo}, Mags: {currentMag}/{maxMag}");
+            }
+
+            // Reset state
             isReloading = false;
         }
 
-        public void HandleShoot(InputAction.CallbackContext context)
+        public void OnShootInput(InputAction.CallbackContext context)
         {
-            // Ignore input if the weapon is not active
             if (!gameObject.activeInHierarchy)
-            {
                 return;
-            }
 
             if (context.started)
             {
-                // If magazine is empty, play click sound and do nothing else
-                if (currentMag == 0)
+                // Check if magazine is empty
+                if (currentMag <= 0 && currentAmmo <= 0)
                 {
-                    if (emptymag != null)
-                    {
-                        emptymag.Play();
-                    }
+                    if (emptyMagSound != null)
+                        emptyMagSound.Play();
                     return;
                 }
 
-                if (!weaponSO.isAutomatic)
+                // Handle non-automatic firing
+                if (!isAutomatic && Time.time >= nextFireTime && currentAmmo > 0)
                 {
-                    if (Time.time >= nextTimeToFire)
-                    {
-                        nextTimeToFire = Time.time + 1f / weaponSO.FireRate;
-                        Shoot();
-                    }
+                    nextFireTime = Time.time + 1f / fireRate;
+                    Shoot();
                 }
-                else
+                // Start continuous firing for automatic weapons
+                else if (isAutomatic)
                 {
-                    isShooting = true;
+                    isFiring = true;
                 }
             }
             else if (context.canceled)
             {
-                isShooting = false;
+                isFiring = false;
             }
         }
 
-        void HandleCrossHair()
+        private void Shoot()
         {
+            if (isReloading || currentAmmo <= 0)
+                return;
+
+            // Play shoot animation
+            animator.SetTrigger(Constants.SHOOT_ANIM);
+
+            // Perform raycast
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
+                // Ignore player hits
+                if (hit.collider.CompareTag(Constants.PLAYER_TAG))
+                    return;
+
+                // Spawn bullet impact
+                if (bulletImpactPrefab != null)
+                    Instantiate(bulletImpactPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+
+                // Apply damage to enemies
                 if (hit.collider.CompareTag(Constants.ENEMY_TAG))
                 {
-                    crossHair.color = Color.red;
-                }
-                else
-                {
-                    crossHair.color = Color.white;
+                    Enemy enemy = hit.collider.GetComponent<Enemy>();
+                    if (enemy != null)
+                        EventManager.RaiseOnEnemyDamage(enemy, damage);
                 }
             }
+
+            // Reduce ammo
+            currentAmmo--;
         }
 
-        void Shoot()
+        private void UpdateCrosshair()
         {
-            if (isReloading) return;
-            if (currentAmmo <= 0) return;
+            if (crosshairImage == null)
+                return;
 
-            animator.Play(Constants.SHOOT_ANIM, 0, 0f);
             RaycastHit hit;
             if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
-                if (hit.collider.CompareTag(Constants.PLAYER_TAG)) return;
-                Instantiate(bulletImpact, hit.point, quaternion.identity);
-                currentAmmo--;
-                if (hit.collider.CompareTag(Constants.ENEMY_TAG))
-                    EventManager.RaiseOnEnemyDamage(hit.collider.GetComponent<Enemy>(), weaponSO.Damage);
+                crosshairImage.color = hit.collider.CompareTag(Constants.ENEMY_TAG) ? Color.red : Color.white;
+            }
+            else
+            {
+                crosshairImage.color = Color.white;
             }
         }
+
         public int GetCurrentAmmo()
         {
             return currentAmmo;
@@ -176,6 +208,5 @@ namespace FPS.Weapon
         {
             return currentMag;
         }
-
     }
 }
