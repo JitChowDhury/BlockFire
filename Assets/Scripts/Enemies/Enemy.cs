@@ -8,23 +8,24 @@ using UnityEngine.InputSystem;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] GameObject explosionPrefab;
+    [SerializeField] private float health = 40f;
+    [SerializeField] private float damageAmount = 25f;
 
     private NavMeshAgent agent;
     private Transform Player;
     private float distanceToPlayer;
     private float attackRange = 2f;
-    private PlayerInput playerInput;
+
     private bool hasExploded = false;
 
 
-    [SerializeField] private float health = 40f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         Player = GameObject.FindWithTag(Constants.PLAYER_TAG).GetComponent<Transform>();
-        playerInput = GameObject.Find("GameManager").GetComponent<PlayerInput>();
+
 
     }
 
@@ -54,7 +55,8 @@ public class Enemy : MonoBehaviour
             hasExploded = true;
             Instantiate(explosionPrefab, transform.position, quaternion.identity);
             Destroy(gameObject);
-            //playerInput.enabled = false;
+            EventManager.RaiseOnPlayerDamage(damageAmount);
+
         }
     }
 
@@ -72,6 +74,7 @@ public class Enemy : MonoBehaviour
     {
         if (target != this) return;
         health -= damage;
+
     }
 
 }

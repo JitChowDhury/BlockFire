@@ -54,7 +54,7 @@ namespace FPS.Weapon
             animator = GetComponent<Animator>();
             if (animator == null)
             {
-                Debug.LogError("Animator component not found on Gun GameObject!");
+
             }
         }
 
@@ -62,7 +62,7 @@ namespace FPS.Weapon
         {
             isFiring = false;
             isReloading = false;
-            Debug.Log("Gun enabled, isFiring reset to false");
+
         }
 
         void OnDisable()
@@ -70,14 +70,14 @@ namespace FPS.Weapon
             isFiring = false;
             isReloading = false;
             StopAllCoroutines();
-            Debug.Log("Gun disabled, isFiring and isReloading reset");
+
         }
 
         void Update()
         {
             if (isReloading)
             {
-                Debug.Log($"Reloading, Update blocked. Animator state: {(animator.GetCurrentAnimatorStateInfo(0).IsName("Reload") ? "Reload" : "Other")}");
+
                 return;
             }
 
@@ -103,47 +103,47 @@ namespace FPS.Weapon
         {
             if (currentMag <= 0 || isReloading || currentAmmo >= maxAmmo)
             {
-                Debug.Log("Cannot reload: No mags, already reloading, or ammo full");
+
                 yield break;
             }
 
             isReloading = true;
-            Debug.Log($"Starting reload animation, Trigger: {Constants.RELOAD_ANIM}");
+
             animator.SetTrigger(Constants.RELOAD_ANIM);
 
             // Wait until Reload state is active
             yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Reload"));
             float stateLength = animator.GetCurrentAnimatorStateInfo(0).length;
-            Debug.Log($"Reload state active, duration: {stateLength}s (Clip length: {reloadClip.length}s)");
-            yield return new WaitForSeconds(stateLength + 0.5f);
+
+            yield return new WaitForSeconds(stateLength + 0.4f);
 
             if (currentMag > 0)
             {
                 currentAmmo = maxAmmo;
                 currentMag--;
-                Debug.Log($"Reloaded. Ammo: {currentAmmo}/{maxAmmo}, Mags: {currentMag}/{maxMag}");
+
             }
 
             isReloading = false;
             isFiring = false;
-            Debug.Log("Reload complete, isFiring reset to false");
+
         }
 
         public void OnShootInput(InputAction.CallbackContext context)
         {
             if (!gameObject.activeInHierarchy || isReloading)
             {
-                Debug.Log("Shoot input ignored: Inactive or reloading");
+
                 return;
             }
 
             if (context.started)
             {
-                Debug.Log("Shoot input started");
+
                 if (currentMag <= 0 && currentAmmo <= 0)
                 {
                     emptyMagSound?.Play();
-                    Debug.Log("Empty mag, cannot shoot");
+
                     return;
                 }
 
@@ -155,13 +155,13 @@ namespace FPS.Weapon
                 else if (isAutomatic && currentAmmo > 0)
                 {
                     isFiring = true;
-                    Debug.Log("isFiring set to true");
+
                 }
             }
             else if (context.canceled)
             {
                 isFiring = false;
-                Debug.Log("Shoot input canceled, isFiring set to false");
+
             }
         }
 
@@ -169,11 +169,11 @@ namespace FPS.Weapon
         {
             if (isReloading || currentAmmo <= 0)
             {
-                Debug.Log("Cannot shoot: Reloading or no ammo");
+
                 return;
             }
 
-            Debug.Log("Shoot triggered");
+
             animator.SetTrigger(Constants.SHOOT_ANIM);
 
             RaycastHit hit;
