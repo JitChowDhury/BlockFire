@@ -167,5 +167,15 @@ namespace FPS.Weapon
                     EventManager.RaiseOnEnemyDamage(hit.collider.GetComponent<Enemy>(), weaponSO.Damage);
             }
         }
+        public int GetCurrentAmmo()
+        {
+            return currentAmmo;
+        }
+
+        public int GetCurrentMag()
+        {
+            return currentMag;
+        }
+
     }
 }

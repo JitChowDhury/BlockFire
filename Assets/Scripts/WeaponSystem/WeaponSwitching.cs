@@ -41,10 +41,15 @@ namespace FPS.Weapon
             int i = 0;
             foreach (Transform weapon in transform)
             {
-                if (i == selectedWeapon)
-                    weapon.gameObject.SetActive(true);
-                else
-                    weapon.gameObject.SetActive(false);
+                bool isSelected = (i == selectedWeapon);
+                weapon.gameObject.SetActive(isSelected);
+
+                if (isSelected)
+                {
+                    // Tell UIManager which weapon is active
+                    Gun gun = weapon.GetComponent<Gun>();
+                    FindFirstObjectByType<WeaponUIManager>().SetGun(gun);
+                }
                 i++;
             }
         }
