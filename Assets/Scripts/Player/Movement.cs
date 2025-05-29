@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // Namespace to organize player-related scripts
-namespace FPS.Player
+namespace Player
 {
     public class Movement : MonoBehaviour
     {
@@ -19,7 +19,7 @@ namespace FPS.Player
         private float verticalVelocity;
 
         public float speed = 5f;
-        // Jump force, determines jump height
+        // Jumpforce, determines jump height
         public float jumpForce = 1.5f;
         // Gravity acceleration, negative to pull downward
         public float gravity = -9.8f;
@@ -27,13 +27,13 @@ namespace FPS.Player
         // Sensitivity for look rotation speed (mouse/gamepad), adjustable in Inspector
         public float lookSensitivity = 100f;
         // Tracks camera's vertical (pitch) angle for up/down looking
-        private float pitch = 0f;
+        private float pitch;
 
 
         public Transform cameraTransform;
 
         // Called once at start to initialize components
-        void Start()
+        private void Start()
         {
 
             playerCharController = GetComponent<CharacterController>();
@@ -48,7 +48,7 @@ namespace FPS.Player
         }
 
         // Called every frame to update movement and rotation
-        void Update()
+        private void Update()
         {
             if (Cursor.visible) return;//player will not move if cursor is not on game
             // Update grounded state for jump logic
@@ -122,7 +122,7 @@ namespace FPS.Player
         public void HandleJump(InputAction.CallbackContext context)
         {
             // Only jump if Space is pressed and character is grounded
-            // Effect: Prevents mid-air jumps and ensures single jump per press
+            // Effect: Prevents midair jumps and ensures single jump per press
             if (!context.performed || !isGrounded) return;
             // Apply jump force to vertical velocity for upward motion
             // Effect: Initiates jump, countered by gravity later

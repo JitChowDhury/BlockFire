@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using FPS.Enemies;
 namespace FPS.Core
 {
     public static class EventManager
