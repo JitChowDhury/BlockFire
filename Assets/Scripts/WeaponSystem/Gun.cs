@@ -4,6 +4,7 @@ using FPS.Utility;
 using Unity.Mathematics;
 using System.Collections;
 using FPS.Core;
+using FPS.Enemies;
 using UnityEngine.UI;
 
 namespace FPS.Weapon
