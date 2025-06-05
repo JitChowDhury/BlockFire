@@ -1,54 +1,51 @@
 using System;
 using UnityEngine;
 
-namespace  FPS.Enemies
+namespace FPS.Enemies
 {
     public class Drone : MonoBehaviour
     {
-        [SerializeField] private float chaseRange;
+        [SerializeField] private float chaseRange; // Range within which drone starts chasing player
+        [SerializeField] private float attackRange; // Range within which drone stops to attack
+        [SerializeField] private Transform player; // Reference to player transform
+        [SerializeField] private float speed; // Movement speed of drone
+        [SerializeField] private GameObject Light; // Light that turns on when chasing
 
-        [SerializeField] private float attackRange;
-        [SerializeField] private Transform player;
-        [SerializeField] private float speed;
-
-        [SerializeField] private GameObject Light;
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
-            Light.SetActive(false);
+            Light.SetActive(false); // Disable light initially
         }
 
-        // Update is called once per frame
         void Update()
         {
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance < chaseRange)
-        {
-            Light.SetActive(true);
-            transform.position = Vector3.MoveTowards(transform.position, player.position, speed*Time.deltaTime);
+            float distance = Vector3.Distance(transform.position, player.position); // Distance to player
 
-            Vector3 direction = player.position - transform.position;
-            direction.y = 0;
-            
-            Quaternion startRotation = transform.rotation;
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, Time.deltaTime);
-        }
+            if (distance < chaseRange)
+            {
+                Light.SetActive(true); // Enable light when in chase range
 
-        if (distance < attackRange)
-        {
-            //damage logic
-            speed = 0;
-        }
-        
+                // Move toward player
+                transform.position = Vector3.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
+
+                // Rotate smoothly toward player
+                Vector3 direction = player.position - transform.position;
+                direction.y = 0; // Prevent tilting up/down
+
+                Quaternion startRotation = transform.rotation;
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Lerp(startRotation, targetRotation, Time.deltaTime);
+            }
+
+            if (distance < attackRange)
+            {
+                speed = 0; // Stop moving when in attack range (placeholder for damage logic)
+            }
         }
 
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position,chaseRange);
-            
+            Gizmos.DrawWireSphere(transform.position, chaseRange); // Draw chase range in editor
         }
     }
 }
-
